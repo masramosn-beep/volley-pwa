@@ -1,3 +1,4 @@
+import { sha256Hex, loadLocalAccess, saveLocalAccess } from "./auth.js";
 import { qs, qsa } from "./ui.js";
 import { getTheme, setTheme, getSettings, setSettings, getPlayers, setPlayers, uid } from "./storage.js";
 import { initCalendar } from "./calendar.js";
@@ -18,6 +19,55 @@ const state = {
 
 bindDom();
 boot();
+
+function showLogin(){
+  state.dom.loginError.textContent = "";
+  const saved = loadLocalAccess();
+  if(saved?.teamId) state.dom.loginTeamId.value = saved.teamId;
+  state.dom.loginPassword.value = "";
+  state.dom.loginModal.classList.remove("hidden");
+}
+
+function hideLogin(){
+  state.dom.loginModal.classList.add("hidden");
+}
+
+function wireLogin(){
+  if(state.__loginWired) return;
+  state.__loginWired = true;
+
+  state.dom.loginRememberBtn.addEventListener("click", ()=>{
+    state.dom.loginError.textContent = "Se recordará al entrar correctamente.";
+  });
+
+  state.dom.loginBtn.addEventListener("click", async ()=>{
+    try{
+      state.dom.loginError.textContent = "";
+
+      const teamId = (state.dom.loginTeamId.value || "").trim();
+      const pass = (state.dom.loginPassword.value || "").trim();
+
+      if(!teamId || !pass){
+        state.dom.loginError.textContent = "Falta Team ID o contraseña.";
+        return;
+      }
+
+      // hash local de contraseña (no guardamos el texto)
+      const passHash = await sha256Hex(pass);
+
+      // Guardamos localmente para el siguiente paso (cloud)
+      saveLocalAccess(teamId, passHash);
+
+      hideLogin();
+
+      // De momento solo desbloqueamos la app (arranque normal)
+      location.reload();
+
+    }catch(e){
+      state.dom.loginError.textContent = "Error en login.";
+    }
+  });
+}
 
 function bindDom(){
   // top
@@ -98,6 +148,14 @@ function bindDom(){
   state.dom.standingsUpdatedLabel = qs("#standingsUpdatedLabel");
   state.dom.refreshStandingsBtn = qs("#refreshStandingsBtn");
   state.dom.standingsTable = qs("#standingsTable");
+  
+  // login modal
+  state.dom.loginModal = qs("#loginModal");
+  state.dom.loginTeamId = qs("#loginTeamId");
+  state.dom.loginPassword = qs("#loginPassword");
+  state.dom.loginBtn = qs("#loginBtn");
+  state.dom.loginRememberBtn = qs("#loginRememberBtn");
+  state.dom.loginError = qs("#loginError");
 
   // settings dom
   state.dom.myNameInput = qs("#myNameInput");
@@ -122,6 +180,15 @@ async function boot(){
 
   // install prompt
   setupInstall();
+  
+  // BLOQUEO: exigir login antes de usar la app
+  // (Ahora mismo: solo exige que exista un acceso guardado)
+  const access = loadLocalAccess();
+  if(!access?.teamId || !access?.passHash){
+    showLogin();
+    wireLogin();
+    return; // no arranca módulos sin login
+  }
 
   // init modules
   initCalendar(state);
@@ -354,3 +421,4 @@ function renderSettings(){
 function escapeHTML(s){
   return String(s).replace(/[<>&"]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;", "\"":"&quot;" }[c]));
 }
+
