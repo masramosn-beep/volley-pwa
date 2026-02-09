@@ -34,7 +34,20 @@ export function getSettings(){
   });
 }
 
-export function setSettings(s){ saveJSON(LS_KEYS.settings, s); }
+export function setSettings(s){
+  saveJSON(LS_KEYS.settings, s);
+
+  // Solo sincronizamos lo compartido (no el nombre personal)
+  if(window.__cloudPush && !window.__cloudApplying){
+    const teamShared = {
+      startHour: s.startHour,
+      endHour: s.endHour,
+      blocked: s.blocked || {}
+    };
+    window.__cloudPush("teamShared", teamShared);
+  }
+}
+
 
 export function getPlayers(){
   return loadJSON(LS_KEYS.players, [
@@ -47,7 +60,14 @@ export function getPlayers(){
     { id: "p7", name: "Lara" }
   ]);
 }
-export function setPlayers(p){ saveJSON(LS_KEYS.players, p); }
+
+export function setPlayers(p){
+  saveJSON(LS_KEYS.players, p);
+  if(window.__cloudPush && !window.__cloudApplying){
+    window.__cloudPush("players", p);
+  }
+}
+
 
 export function getEvents(){
   return loadJSON(LS_KEYS.events, [
@@ -73,19 +93,39 @@ export function getEvents(){
     }
   ]);
 }
-export function setEvents(e){ saveJSON(LS_KEYS.events, e); }
+
+export function setEvents(e){
+  saveJSON(LS_KEYS.events, e);
+  if(window.__cloudPush && !window.__cloudApplying){
+    window.__cloudPush("events", e);
+  }
+}
+
 
 export function getAvailability(){
   // availability[weekStartISO][playerId][dayIndex][hour] = 0..3
   return loadJSON(LS_KEYS.availability, {});
 }
-export function setAvailability(a){ saveJSON(LS_KEYS.availability, a); }
+
+export function setAvailability(a){
+  saveJSON(LS_KEYS.availability, a);
+  if(window.__cloudPush && !window.__cloudApplying){
+    window.__cloudPush("availability", a);
+  }
+}
 
 export function getRotations(){
   // rotations[name] = { set1:{1:pid,...6}, set2:{...}, updatedAt }
   return loadJSON(LS_KEYS.rotations, {});
 }
-export function setRotations(r){ saveJSON(LS_KEYS.rotations, r); }
+
+export function setRotations(r){
+  saveJSON(LS_KEYS.rotations, r);
+  if(window.__cloudPush && !window.__cloudApplying){
+    window.__cloudPush("rotations", r);
+  }
+}
+
 
 export function getTheme(){
   return localStorage.getItem(LS_KEYS.theme) || "dark";
@@ -93,3 +133,4 @@ export function getTheme(){
 export function setTheme(t){
   localStorage.setItem(LS_KEYS.theme, t);
 }
+
