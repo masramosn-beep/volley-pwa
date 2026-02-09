@@ -360,3 +360,23 @@ a{ color:var(--orange); }
 .court-row{
   display:flex; gap:14px; flex-wrap:wrap;
 }
+/* Calendario: día con partido / entreno */
+.cal-day.match-day,
+.day.match-day {
+  outline: 2px solid rgba(255,106,0,.9);
+  background: rgba(255,106,0,.18);
+}
+
+.cal-day.training-day,
+.day.training-day {
+  outline: 2px solid rgba(80,160,255,.9);
+  background: rgba(80,160,255,.18);
+}
+
+/* Emoji dentro del día */
+.day-emoji{
+  font-size: 14px;
+  opacity: .95;
+  margin-left: 6px;
+}
+
