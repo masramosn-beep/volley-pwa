@@ -48,12 +48,6 @@ if(hasMatch || hasTraining){
   dnum.appendChild(el("span",{class:"day-emoji"},[hasMatch ? "🏆" : "🏐"]));
 }
 
-      evs.slice(0,3).forEach(ev=>{
-        box.appendChild(el("span",{class:`badge ${ev.type}`},[ev.title]));
-      });
-      if(evs.length>3){
-        box.appendChild(el("span",{class:"badge"},[`+${evs.length-3} más…`]));
-      }
 
       box.addEventListener("click", ()=>{
         state.selectedDate = dISO;
@@ -179,4 +173,5 @@ function groupByDate(events){
   }
   return out;
 }
+
 
