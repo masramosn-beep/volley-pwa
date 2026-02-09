@@ -380,3 +380,15 @@ a{ color:var(--orange); }
   margin-left: 6px;
 }
 
+/* Bottom sheet (pestaña) */
+.modal-card.sheet{
+  width: min(560px, calc(100vw - 24px));
+  margin: 0 auto;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  max-height: 55vh;
+  overflow: auto;
+}
+
