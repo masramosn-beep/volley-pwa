@@ -133,6 +133,13 @@ function bindDom(){
   state.dom.teamAvailMaybe = qs("#teamAvailMaybe");
   state.dom.teamAvailNoCount = qs("#teamAvailNoCount");
 
+  // day info modal (bottom sheet)
+  state.dom.dayInfoModal = qs("#dayInfoModal");
+  state.dom.dayInfoTitle = qs("#dayInfoTitle");
+  state.dom.dayInfoList = qs("#dayInfoList");
+  state.dom.closeDayInfoBtn = qs("#closeDayInfoBtn");
+
+  
   // rotations dom
   state.dom.rotationPlayersSelect = qs("#rotationPlayersSelect");
   state.dom.rotationNameInput = qs("#rotationNameInput");
@@ -347,6 +354,11 @@ function wireModals(){
     if(e.target === state.dom.teamCellModal) state.closeTeamCellModal();
   });
 }
+  // day info modal (bottom sheet)
+  state.dom.closeDayInfoBtn.addEventListener("click", ()=> state.dom.dayInfoModal.classList.add("hidden"));
+  state.dom.dayInfoModal.addEventListener("click", (e)=>{
+    if(e.target === state.dom.dayInfoModal) state.dom.dayInfoModal.classList.add("hidden");
+  });
 
 function wireSettings(){
   state.dom.saveSettingsBtn.addEventListener("click", ()=>{
@@ -440,6 +452,7 @@ function renderSettings(){
 function escapeHTML(s){
   return String(s).replace(/[<>&"]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;", "\"":"&quot;" }[c]));
 }
+
 
 
 
