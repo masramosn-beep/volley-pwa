@@ -48,16 +48,15 @@ if(hasMatch || hasTraining){
   dnum.appendChild(el("span",{class:"day-emoji"},[hasMatch ? "🏆" : "🏐"]));
 }
 
-
-      box.addEventListener("click", ()=>{
-        state.selectedDate = dISO;
-        renderDayList();
-      });
+box.addEventListener("click", ()=>{
+  state.selectedDate = dISO;
+  openDaySheet(dISO);
+});
 
       grid.appendChild(box);
     }
 
-    renderDayList();
+  
   }
 
   function renderDayList(){
@@ -94,6 +93,46 @@ if(hasMatch || hasTraining){
     }
   }
 
+  
+  
+  function openDaySheet(dISO){
+  const modal = state.dom.dayInfoModal;
+  const title = state.dom.dayInfoTitle;
+  const list = state.dom.dayInfoList;
+
+  list.innerHTML = "";
+
+  const events = getEvents().filter(e=>e.date === dISO)
+    .sort((a,b)=>(a.start||"").localeCompare(b.start||""));
+
+  title.textContent = `${dISO} · ${events.length} evento(s)`;
+
+  if(events.length === 0){
+    list.appendChild(el("div",{class:"muted"},["No hay eventos este día."]));
+  }else{
+    for(const ev of events){
+      const item = el("div",{class:"item"});
+      const meta = el("div",{class:"meta"},[
+        el("b",{},[ev.title]),
+        el("span",{},[
+          `${ev.type==="match"?"Partido":"Entreno"} · ${ev.start||"--:--"}–${ev.end||"--:--"} · ${ev.place||""}`
+        ]),
+        ev.notes ? el("span",{},[ev.notes]) : null
+      ]);
+      const right = el("div",{},[
+        el("span",{class:`tag pill ${ev.type}`},[ev.type==="match"?"Partido":"Entreno"])
+      ]);
+      item.append(meta,right);
+      item.addEventListener("click", ()=> state.openEventModal(ev.id));
+      list.appendChild(item);
+    }
+  }
+
+  modal.classList.remove("hidden");
+}
+
+
+  
   state.actions.renderCalendar = render;
 
   // modal hooks
@@ -173,5 +212,6 @@ function groupByDate(events){
   }
   return out;
 }
+
 
 
