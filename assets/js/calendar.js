@@ -34,6 +34,20 @@ export function initCalendar(state){
       box.appendChild(el("div",{class:"dnum"},[String(day.getDate())]));
 
       const evs = byDate[dISO] || [];
+    
+      // --- NUEVO: marcar el día según tipo de evento (prioridad partido) ---
+const hasMatch = evs.some(ev => ev.type === "match");
+const hasTraining = !hasMatch && evs.some(ev => ev.type === "training");
+
+if(hasMatch) box.classList.add("match-day");
+else if(hasTraining) box.classList.add("training-day");
+
+// emoji en el número del día
+if(hasMatch || hasTraining){
+  const dnum = box.querySelector(".dnum");
+  dnum.appendChild(el("span",{class:"day-emoji"},[hasMatch ? "🏆" : "🏐"]));
+}
+
       evs.slice(0,3).forEach(ev=>{
         box.appendChild(el("span",{class:`badge ${ev.type}`},[ev.title]));
       });
@@ -165,3 +179,4 @@ function groupByDate(events){
   }
   return out;
 }
+
