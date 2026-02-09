@@ -191,22 +191,29 @@ async function boot(){
     return; // no arranca módulos sin login
   }
 
+  // ✅ VALIDAR PASSWORD EN FIREBASE ANTES DE ARRANCAR LA APP
+try{
+  await initCloud(state);
+}catch(e){
+  if(String(e?.message || e) === "PASSWORD_INVALID"){
+    showLogin();
+    wireLogin();
+    state.dom.loginError.textContent = "Contraseña incorrecta.";
+    return; // 👈 MUY IMPORTANTE: NO arrancar la app
+  }
+  console.error("Cloud error:", e);
+  // Si hay error de red/config, también bloqueamos para evitar entrar sin sync
+  showLogin();
+  wireLogin();
+  state.dom.loginError.textContent = "Error conectando con el servidor del equipo.";
+  return;
+}
+
   // init modules
   initCalendar(state);
   initAvailability(state);
   initRotations(state);
   await initStandings(state);
-
-    try{
-    await initCloud(state);
-  }catch(e){
-    if(String(e?.message || e) === "PASSWORD_INVALID"){
-      showLogin();
-      wireLogin();
-      state.dom.loginError.textContent = "Contraseña incorrecta.";
-      return;
-    }
-  }
 
   // wiring
   wireCalendarButtons();
@@ -433,5 +440,6 @@ function renderSettings(){
 function escapeHTML(s){
   return String(s).replace(/[<>&"]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;", "\"":"&quot;" }[c]));
 }
+
 
 
