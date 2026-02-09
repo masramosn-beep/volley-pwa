@@ -1,3 +1,4 @@
+import { initCloud } from "./cloud.js";
 import { sha256Hex, loadLocalAccess, saveLocalAccess } from "./auth.js";
 import { qs, qsa } from "./ui.js";
 import { getTheme, setTheme, getSettings, setSettings, getPlayers, setPlayers, uid } from "./storage.js";
@@ -195,6 +196,17 @@ async function boot(){
   initAvailability(state);
   initRotations(state);
   await initStandings(state);
+
+    try{
+    await initCloud(state);
+  }catch(e){
+    if(String(e?.message || e) === "PASSWORD_INVALID"){
+      showLogin();
+      wireLogin();
+      state.dom.loginError.textContent = "Contraseña incorrecta.";
+      return;
+    }
+  }
 
   // wiring
   wireCalendarButtons();
@@ -421,4 +433,5 @@ function renderSettings(){
 function escapeHTML(s){
   return String(s).replace(/[<>&"]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;", "\"":"&quot;" }[c]));
 }
+
 
