@@ -172,7 +172,7 @@
         </div>
 
         <div class="muted">
-          Fuente: Clupik (se actualiza en el repo vía GitHub Actions para evitar CORS en GitHub Pages). :contentReference[oaicite:1]{index=1}
+          Fuente: Clupik (se actualiza en el repo vía GitHub Actions para evitar CORS en GitHub Pages).
         </div>
       </div>
     </section>
@@ -338,7 +338,34 @@
       <div class="muted" id="teamAvailNoCount"></div>
     </div>
   </div>
+  <!-- MODAL LOGIN -->
+  <div class="modal hidden" id="loginModal" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width:520px;">
+      <div class="h3">Acceso del equipo</div>
+      <div class="muted">Introduce la contraseña común para entrar.</div>
+
+      <div style="height:12px;"></div>
+
+      <label class="field">
+        <span>Team ID</span>
+        <input id="loginTeamId" placeholder="Ej: volley-2026" />
+      </label>
+
+      <label class="field">
+        <span>Contraseña</span>
+        <input id="loginPassword" type="password" placeholder="Contraseña del equipo" />
+      </label>
+
+      <div class="row between wrap gap" style="margin-top:10px;">
+        <button class="btn" id="loginRememberBtn" title="Guardar en este dispositivo">Recordar</button>
+        <button class="btn primary" id="loginBtn">Entrar</button>
+      </div>
+
+      <div class="muted" id="loginError" style="margin-top:10px;"></div>
+    </div>
+  </div>
 
   <script type="module" src="./assets/js/app.js"></script>
 </body>
 </html>
+
