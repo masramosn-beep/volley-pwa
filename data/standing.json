@@ -1,0 +1,9 @@
+{
+  "updatedAt": "2026-02-08T00:00:00.000Z",
+  "source": "https://clupik.pro/es/tournament/1324450/ranking",
+  "headers": ["Pos", "Equipo", "Pts", "PJ", "PG", "PP", "F", "C", "D"],
+  "rows": [
+    [1, "Borras V.C.", 21, 9, 7, 2, 15, 5, 10],
+    [2, "Mediterrànies", 21, 10, 8, 2, 16, 7, 9]
+  ]
+}

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#ff6a00" />
+  <title>Volley Team PWA</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icons/icon-192.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/css/app.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">V</div>
+      <div>
+        <div class="title">Volley Team</div>
+        <div class="subtitle" id="subtitle">Calendario</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn ghost" id="toggleThemeBtn" title="Modo oscuro">🌓</button>
+      <button class="btn ghost" id="installBtn" style="display:none;" title="Instalar">⬇️</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- CALENDARIO -->
+    <section class="page" id="page-calendar" data-title="Calendario">
+      <div class="card">
+        <div class="row between wrap gap">
+          <div class="row gap">
+            <button class="btn" id="prevMonthBtn">◀</button>
+            <div class="h2" id="monthLabel"></div>
+            <button class="btn" id="nextMonthBtn">▶</button>
+          </div>
+          <div class="row gap wrap">
+            <button class="btn primary" id="addEventBtn">+ Añadir evento</button>
+            <button class="btn" id="todayBtn">Hoy</button>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span class="pill match">Partido</span>
+          <span class="pill training">Entreno</span>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="h3">Eventos del día</div>
+        <div class="muted" id="dayEventsLabel">Selecciona un día…</div>
+        <div class="list" id="dayEventsList"></div>
+      </div>
+    </section>
+
+    <!-- DISPONIBILIDAD -->
+    <section class="page hidden" id="page-availability" data-title="Disponibilidad">
+      <div class="card">
+        <div class="row between wrap gap">
+          <div class="row gap wrap">
+            <button class="btn" id="prevWeekBtn">◀ Semana</button>
+            <div>
+              <div class="h2" id="weekLabel"></div>
+              <div class="muted" id="weekRangeLabel"></div>
+            </div>
+            <button class="btn" id="nextWeekBtn">Semana ▶</button>
+          </div>
+
+          <div class="row gap wrap">
+            <label class="field">
+              <span>Jugador</span>
+              <select id="playerSelect"></select>
+            </label>
+            <button class="btn" id="thisWeekBtn">Esta semana</button>
+          </div>
+        </div>
+
+        <div class="availability-legend">
+          <span class="cell demo s0">Vacío</span>
+          <span class="cell demo s1">Disponible</span>
+          <span class="cell demo s2">Urgente</span>
+          <span class="cell demo s3">No</span>
+          <span class="cell demo blocked">NO HAY PISTA</span>
+        </div>
+
+        <div class="h3">Mi disponibilidad (toca/clica para alternar)</div>
+        <div class="grid-wrap" id="myAvailGrid"></div>
+        <div class="muted">Tip: click = alterna · shift+click = marca “No disponible” rápido.</div>
+      </div>
+
+      <div class="card">
+        <div class="row between wrap gap">
+          <div>
+            <div class="h3">Resumen del equipo</div>
+            <div class="muted">Verde si hay 6+ (contando “Urgente”), y nunca en “NO HAY PISTA”.</div>
+          </div>
+          <button class="btn" id="recalcTeamBtn">Recalcular</button>
+        </div>
+        <div class="grid-wrap" id="teamAvailGrid"></div>
+      </div>
+    </section>
+
+    <!-- ROTACIONES -->
+    <section class="page hidden" id="page-rotations" data-title="Rotaciones">
+      <div class="card">
+        <div class="row between wrap gap">
+          <div class="row gap wrap">
+            <label class="field">
+              <span>Plantilla</span>
+              <select id="rotationPlayersSelect"></select>
+            </label>
+
+            <label class="field">
+              <span>Guardar como</span>
+              <input id="rotationNameInput" placeholder="Jornada X vs Equipo Y" />
+            </label>
+            <button class="btn primary" id="saveRotationBtn">Guardar</button>
+          </div>
+
+          <div class="row gap wrap">
+            <label class="field">
+              <span>Cargar</span>
+              <select id="rotationLoadSelect"></select>
+            </label>
+            <button class="btn" id="loadRotationBtn">Cargar</button>
+            <button class="btn" id="clearRotationBtn">Limpiar</button>
+            <button class="btn" id="exportRotationBtn">Exportar PNG</button>
+          </div>
+        </div>
+
+        <div class="row gap wrap">
+          <div class="card inner">
+            <div class="h3">Jugadores (arrastrar a posiciones)</div>
+            <div class="player-pool" id="playerPool"></div>
+          </div>
+
+          <div class="card inner grow">
+            <div class="h3">Rotación Set 1</div>
+            <div class="court-wrap" id="courtSet1"></div>
+          </div>
+
+          <div class="card inner grow">
+            <div class="h3">Rotación Set 2</div>
+            <div class="court-wrap" id="courtSet2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLASIFICACIÓN -->
+    <section class="page hidden" id="page-standings" data-title="Clasificación">
+      <div class="card">
+        <div class="row between wrap gap">
+          <div>
+            <div class="h2">Clasificación</div>
+            <div class="muted" id="standingsUpdatedLabel">Cargando…</div>
+          </div>
+          <div class="row gap">
+            <button class="btn" id="refreshStandingsBtn">Refrescar</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="standingsTable">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="muted">
+          Fuente: Clupik (se actualiza en el repo vía GitHub Actions para evitar CORS en GitHub Pages). :contentReference[oaicite:1]{index=1}
+        </div>
+      </div>
+    </section>
+
+    <!-- AJUSTES -->
+    <section class="page hidden" id="page-settings" data-title="Ajustes">
+      <div class="card">
+        <div class="h2">Ajustes</div>
+
+        <div class="row gap wrap">
+          <label class="field grow">
+            <span>Mi nombre (perfil local)</span>
+            <input id="myNameInput" placeholder="Tu nombre" />
+          </label>
+
+          <label class="field">
+            <span>Hora inicio</span>
+            <input id="startHourInput" type="number" min="0" max="23" />
+          </label>
+
+          <label class="field">
+            <span>Hora fin</span>
+            <input id="endHourInput" type="number" min="1" max="24" />
+          </label>
+
+          <button class="btn primary" id="saveSettingsBtn">Guardar ajustes</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row between wrap gap">
+          <div>
+            <div class="h3">Jugadores del equipo</div>
+            <div class="muted">Se guarda localmente en este dispositivo.</div>
+          </div>
+          <button class="btn" id="addPlayerBtn">+ Añadir</button>
+        </div>
+        <div class="list" id="playersList"></div>
+      </div>
+
+      <div class="card">
+        <div class="row between wrap gap">
+          <div>
+            <div class="h3">Horas bloqueadas (NO HAY PISTA)</div>
+            <div class="muted">
+              Toca para bloquear/desbloquear. No se pueden editar en disponibilidad y se ignoran al calcular coincidencias.
+            </div>
+          </div>
+          <button class="btn" id="clearBlockedBtn">Limpiar bloqueos</button>
+        </div>
+        <div class="grid-wrap" id="blockedGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="h3">Modo “equipo real” (sin implementarlo por defecto)</div>
+        <div class="muted">
+          En esta versión todo es local. Abajo te dejo una opción simple para multiusuario.
+        </div>
+        <details>
+          <summary>Propuesta multiusuario (Firebase / Supabase)</summary>
+          <div class="muted" style="margin-top:8px">
+            - <b>Firebase (Firestore)</b>: fácil auth + realtime, buena DX, pero requiere proyecto Firebase y reglas.<br>
+            - <b>Supabase</b>: Postgres + auth, también muy bien, pero algo más de setup.<br><br>
+            Estructura recomendada (si lo activas):<br>
+            <code>teams/{teamId}/players/{playerId}</code><br>
+            <code>teams/{teamId}/availability/{weekStart}/{playerId}</code><br>
+            <code>teams/{teamId}/events/{eventId}</code><br><br>
+            Pros: cada jugador rellena desde su móvil. Contras: dependencia externa y gestión de permisos.
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <nav class="nav">
+    <button class="navbtn active" data-route="#calendar">📅<span>Calendario</span></button>
+    <button class="navbtn" data-route="#availability">✅<span>Dispon.</span></button>
+    <button class="navbtn" data-route="#rotations">🔁<span>Rotaciones</span></button>
+    <button class="navbtn" data-route="#standings">🏆<span>Clasif.</span></button>
+    <button class="navbtn" data-route="#settings">⚙️<span>Ajustes</span></button>
+  </nav>
+
+  <!-- MODAL EVENTO -->
+  <div class="modal hidden" id="eventModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="row between">
+        <div class="h3" id="eventModalTitle">Nuevo evento</div>
+        <button class="btn ghost" id="closeEventModalBtn">✕</button>
+      </div>
+
+      <div class="grid2">
+        <label class="field">
+          <span>Tipo</span>
+          <select id="eventTypeInput">
+            <option value="match">Partido</option>
+            <option value="training">Entreno</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Título</span>
+          <input id="eventTitleInput" placeholder="Ej. vs Redbirds / Entreno técnico" />
+        </label>
+
+        <label class="field">
+          <span>Fecha</span>
+          <input id="eventDateInput" type="date" />
+        </label>
+
+        <label class="field">
+          <span>Inicio</span>
+          <input id="eventStartInput" type="time" />
+        </label>
+
+        <label class="field">
+          <span>Fin</span>
+          <input id="eventEndInput" type="time" />
+        </label>
+
+        <label class="field">
+          <span>Lugar</span>
+          <input id="eventPlaceInput" placeholder="Pabellón / Campus / etc." />
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Notas</span>
+        <textarea id="eventNotesInput" rows="3" placeholder="Convocatoria, camiseta, etc."></textarea>
+      </label>
+
+      <div class="row between wrap gap">
+        <button class="btn danger" id="deleteEventBtn" style="display:none;">Borrar</button>
+        <div class="row gap">
+          <button class="btn" id="cancelEventBtn">Cancelar</button>
+          <button class="btn primary" id="saveEventBtn">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TEAM CELL -->
+  <div class="modal hidden" id="teamCellModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="row between">
+        <div class="h3" id="teamCellModalTitle">Detalle</div>
+        <button class="btn ghost" id="closeTeamCellModalBtn">✕</button>
+      </div>
+      <div class="pill-row">
+        <span class="pill s1">Disponible</span>
+        <span class="pill s2">Urgente</span>
+        <span class="pill s3">No</span>
+      </div>
+      <div class="row gap wrap">
+        <div class="col grow">
+          <div class="h4">Disponibles</div>
+          <div class="list compact" id="teamAvailYes"></div>
+        </div>
+        <div class="col grow">
+          <div class="h4">Urgente</div>
+          <div class="list compact" id="teamAvailMaybe"></div>
+        </div>
+      </div>
+      <div class="muted" id="teamAvailNoCount"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>
